@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/cpendery/cq/shell"
+	"github.com/cpendery/cq/cmd"
 )
 
 func main() {
-	shell.Start()
+	cmd.Execute()
+	//shell.Start()
 }
