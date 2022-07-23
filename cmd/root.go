@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cpendery/cq/cq/engine"
+	"github.com/cpendery/cq/cq/shell"
 	"github.com/cpendery/cq/internal"
 	"github.com/cpendery/cq/internal/format"
 	"github.com/spf13/cobra"
@@ -21,7 +23,9 @@ supports the following database sources: {{.supportedDBs}}
 `, map[string]interface{}{
 		"supportedDBs": internal.SupportedDatabases,
 	}),
-	RunE: runRootCmd,
+	SilenceUsage:  true,
+	SilenceErrors: true,
+	RunE:          runRootCmd,
 }
 
 func setRootFlags(flags *pflag.FlagSet) {
@@ -48,7 +52,18 @@ func Execute() {
 	}
 }
 
-func runRootCmd(_ *cobra.Command, args []string) error {
-
-	return nil
+func runRootCmd(cmd *cobra.Command, args []string) error {
+	dbEngine := engine.NewEngine()
+	if err := dbEngine.Connect(
+		cmd.Flag("username").Value.String(),
+		cmd.Flag("dbname").Value.String(),
+		cmd.Flag("host").Value.String(),
+		cmd.Flag("port").Value.String(),
+		cmd.Flag("passfile").Value.String(),
+		cmd.Flag("type").Value.String(),
+	); err != nil {
+		return err
+	}
+	appShell := shell.NewShell()
+	return appShell.Start()
 }
