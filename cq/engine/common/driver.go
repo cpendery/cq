@@ -3,6 +3,7 @@ package common
 type Driver interface {
 	Connect(username, dbname, host, port, password string) error
 	Type() DriverType
+	Close() error
 }
 
 type DriverType string

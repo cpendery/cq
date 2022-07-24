@@ -23,7 +23,7 @@ func (p PostgresDriver) Type() common.DriverType {
 	return p.name
 }
 
-func getDataSourceName(username, dbname, host, port, password string) string {
+func getDataSourceName(username, dbname, host, port, password, sslmode string) string {
 	var sb strings.Builder
 
 	if username != "" {
@@ -41,13 +41,18 @@ func getDataSourceName(username, dbname, host, port, password string) string {
 	if password != "" {
 		sb.WriteString(fmt.Sprintf("password=%s ", password))
 	}
-	sb.WriteString("sslmode=disable")
-	fmt.Println(sb.String())
+	switch sslmode {
+	case "":
+		sb.WriteString("sslmode=disable")
+	default:
+		sb.WriteString(fmt.Sprintf("sslmode=%s ", password))
+	}
+
 	return sb.String()
 }
 
 func (p *PostgresDriver) Connect(username, dbname, host, port, password string) error {
-	dataSource := getDataSourceName(username, dbname, host, port, password)
+	dataSource := getDataSourceName(username, dbname, host, port, password, "")
 	db, err := sql.Open(string(p.name), dataSource)
 	if err != nil {
 		return fmt.Errorf("could not connect to database: %v", err)
@@ -56,5 +61,9 @@ func (p *PostgresDriver) Connect(username, dbname, host, port, password string) 
 		return fmt.Errorf("unable to reach database: %v", err)
 	}
 	fmt.Println("database is reachable")
+	return nil
+}
+
+func (p *PostgresDriver) Close() error {
 	return nil
 }
